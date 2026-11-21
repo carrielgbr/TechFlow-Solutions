@@ -1,6 +1,8 @@
 """Acesso ao banco SQLite."""
 import sqlite3
 
+from src.models import Tarefa
+
 DB_PADRAO = "tarefas.db"
 
 
@@ -24,3 +26,22 @@ def criar_tabela(caminho=DB_PADRAO):
             )
             """
         )
+
+
+def criar_tarefa(tarefa, caminho=DB_PADRAO):
+    """Insere uma tarefa no banco e devolve o id gerado."""
+    with conectar(caminho) as conn:
+        cursor = conn.execute(
+            "INSERT INTO tarefas (titulo, descricao, status) VALUES (?, ?, ?)",
+            (tarefa.titulo, tarefa.descricao, tarefa.status),
+        )
+        return cursor.lastrowid
+
+
+def listar_tarefas(caminho=DB_PADRAO):
+    """Devolve todas as tarefas, da mais recente para a mais antiga."""
+    with conectar(caminho) as conn:
+        linhas = conn.execute("SELECT * FROM tarefas ORDER BY id DESC").fetchall()
+    return [
+        Tarefa(l["titulo"], l["descricao"], l["status"], l["id"]) for l in linhas
+    ]
