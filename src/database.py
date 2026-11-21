@@ -45,3 +45,19 @@ def listar_tarefas(caminho=DB_PADRAO):
     return [
         Tarefa(l["titulo"], l["descricao"], l["status"], l["id"]) for l in linhas
     ]
+
+def buscar_tarefa(id_tarefa, caminho=DB_PADRAO):
+    """Devolve uma tarefa pelo id, ou None se não existir."""
+    with conectar(caminho) as conn:
+        l = conn.execute("SELECT * FROM tarefas WHERE id = ?", (id_tarefa,)).fetchone()
+    if l is None:
+        return None
+    return Tarefa(l["titulo"], l["descricao"], l["status"], l["id"])
+
+def atualizar_tarefa(tarefa, caminho=DB_PADRAO):
+    """Grava no banco as alterações de uma tarefa existente."""
+    with conectar(caminho) as conn:
+        conn.execute(
+            "UPDATE tarefas SET titulo = ?, descricao = ?, status = ? WHERE id = ?",
+            (tarefa.titulo, tarefa.descricao, tarefa.status, tarefa.id),
+        )

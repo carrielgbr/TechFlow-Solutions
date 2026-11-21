@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Editar tarefa</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; }
+    .aviso { background: #eef; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; }
+    input, textarea, select { width: 100%; margin-bottom: 8px; padding: 6px; box-sizing: border-box; }
+  </style>
+</head>
+<body>
+  <h1>Editar tarefa</h1>
+
+  {% for mensagem in get_flashed_messages() %}
+    <div class="aviso">{{ mensagem }}</div>
+  {% endfor %}
+
+  <form method="post">
+    <input type="text" name="titulo" value="{{ tarefa.titulo }}" required>
+    <textarea name="descricao">{{ tarefa.descricao }}</textarea>
+    <select name="status">
+      {% for s in status_validos %}
+        <option value="{{ s }}" {% if s == tarefa.status %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">Salvar</button>
+    <a href="{{ url_for('index') }}">Cancelar</a>
+  </form>
+</body>
+</html>
