@@ -74,9 +74,8 @@ def test_exclusao_logica_esconde_mas_mantem_no_banco(db):
 
 # ---------- Rotas ----------
 
-pytest.fixture
 
-
+@pytest.fixture
 def cliente(db):
     """Cliente de teste do Flask apontando para o banco temporário."""
     app.config["DATABASE"] = db

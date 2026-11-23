@@ -81,7 +81,6 @@ def mover(id_tarefa):
     """Move a tarefa para outra coluna do quadro (muda só o status)."""
     tarefa = _buscar_ou_404(id_tarefa)
     tarefa.status = request.form.get("status", "")
-
     erros = tarefa.validar()
     if erros:
         for erro in erros:
