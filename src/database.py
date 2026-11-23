@@ -22,7 +22,8 @@ def criar_tabela(caminho=DB_PADRAO):
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 titulo TEXT NOT NULL,
                 descricao TEXT DEFAULT '',
-                status TEXT NOT NULL DEFAULT 'A Fazer'
+                status TEXT NOT NULL DEFAULT 'A Fazer',
+                excluida_em TEXT DEFAULT NULL
             )
             """
         )
@@ -39,17 +40,22 @@ def criar_tarefa(tarefa, caminho=DB_PADRAO):
 
 
 def listar_tarefas(caminho=DB_PADRAO):
-    """Devolve todas as tarefas, da mais recente para a mais antiga."""
+    """Devolve as tarefas ativas, da mais recente para a mais antiga."""
     with conectar(caminho) as conn:
-        linhas = conn.execute("SELECT * FROM tarefas ORDER BY id DESC").fetchall()
+        linhas = conn.execute(
+            "SELECT * FROM tarefas WHERE excluida_em IS NULL ORDER BY id DESC"
+        ).fetchall()
     return [
         Tarefa(l["titulo"], l["descricao"], l["status"], l["id"]) for l in linhas
     ]
 
 def buscar_tarefa(id_tarefa, caminho=DB_PADRAO):
-    """Devolve uma tarefa pelo id, ou None se não existir."""
+    """Devolve uma tarefa ativa pelo id, ou None se não existir."""
     with conectar(caminho) as conn:
-        l = conn.execute("SELECT * FROM tarefas WHERE id = ?", (id_tarefa,)).fetchone()
+        l = conn.execute(
+            "SELECT * FROM tarefas WHERE id = ? AND excluida_em IS NULL",
+            (id_tarefa,),
+        ).fetchone()
     if l is None:
         return None
     return Tarefa(l["titulo"], l["descricao"], l["status"], l["id"])
@@ -60,4 +66,12 @@ def atualizar_tarefa(tarefa, caminho=DB_PADRAO):
         conn.execute(
             "UPDATE tarefas SET titulo = ?, descricao = ?, status = ? WHERE id = ?",
             (tarefa.titulo, tarefa.descricao, tarefa.status, tarefa.id),
+        )
+
+def remover_tarefa(id_tarefa, caminho=DB_PADRAO):
+    """Exclusão lógica: marca a tarefa como excluída, sem apagar o registro."""
+    with conectar(caminho) as conn:
+        conn.execute(
+            "UPDATE tarefas SET excluida_em = datetime('now') WHERE id = ?",
+            (id_tarefa,),
         )

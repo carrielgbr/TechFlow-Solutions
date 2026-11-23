@@ -28,7 +28,7 @@
   <h2>Tarefas</h2>
   {% for t in tarefas %}
     <div class="tarefa">
-      <strong>{{ t.titulo }}</strong>
+      <strong>{{ t.codigo }}: {{ t.titulo }}</strong>
       <div>{{ t.descricao }}</div>
       <div class="status">{{ t.status }}</div>
       <a href="{{ url_for('editar', id_tarefa=t.id) }}">Editar</a>

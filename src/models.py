@@ -7,6 +7,11 @@ STATUS_VALIDOS = ("A Fazer", "Em Progresso", "Concluído")
 class Tarefa:
     """Representa uma tarefa do sistema."""
 
+    @property
+    def codigo(self):
+        """Código legível da tarefa, ex.: TF-0001."""
+        return f"TF-{self.id:04d}" if self.id else "TF-----"
+
     def __init__(self, titulo, descricao="", status="A Fazer", id=None):
         self.id = id
         self.titulo = titulo
