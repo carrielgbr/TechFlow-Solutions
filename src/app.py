@@ -1,5 +1,5 @@
 """Aplicação web Flask do TechFlow Tasks."""
-from flask import Flask, abort ,render_template, request, redirect, url_for, flash
+from flask import Flask, abort, render_template, request, redirect, url_for, flash
 
 from src.database import (
     criar_tabela, criar_tarefa, listar_tarefas, buscar_tarefa, atualizar_tarefa

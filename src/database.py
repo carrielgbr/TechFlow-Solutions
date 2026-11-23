@@ -7,10 +7,17 @@ DB_PADRAO = "tarefas.db"
 
 
 def conectar(caminho=DB_PADRAO):
-    """Abre uma conexão com o banco. Linhas acessíveis pelo nome da coluna."""
+    """Abre uma conexão com o banco (linhas acessíveis por nome)."""
     conn = sqlite3.connect(caminho)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def _para_tarefa(linha):
+    """Converte uma linha do banco em um objeto Tarefa."""
+    return Tarefa(
+        linha["titulo"], linha["descricao"], linha["status"], linha["id"]
+    )
 
 
 def criar_tabela(caminho=DB_PADRAO):
@@ -43,30 +50,33 @@ def listar_tarefas(caminho=DB_PADRAO):
     """Devolve as tarefas ativas, da mais recente para a mais antiga."""
     with conectar(caminho) as conn:
         linhas = conn.execute(
-            "SELECT * FROM tarefas WHERE excluida_em IS NULL ORDER BY id DESC"
+            "SELECT * FROM tarefas "
+            "WHERE excluida_em IS NULL ORDER BY id DESC"
         ).fetchall()
-    return [
-        Tarefa(l["titulo"], l["descricao"], l["status"], l["id"]) for l in linhas
-    ]
+    return [_para_tarefa(linha) for linha in linhas]
+
 
 def buscar_tarefa(id_tarefa, caminho=DB_PADRAO):
     """Devolve uma tarefa ativa pelo id, ou None se não existir."""
     with conectar(caminho) as conn:
-        l = conn.execute(
+        linha = conn.execute(
             "SELECT * FROM tarefas WHERE id = ? AND excluida_em IS NULL",
             (id_tarefa,),
         ).fetchone()
-    if l is None:
+    if linha is None:
         return None
-    return Tarefa(l["titulo"], l["descricao"], l["status"], l["id"])
+    return _para_tarefa(linha)
+
 
 def atualizar_tarefa(tarefa, caminho=DB_PADRAO):
     """Grava no banco as alterações de uma tarefa existente."""
     with conectar(caminho) as conn:
         conn.execute(
-            "UPDATE tarefas SET titulo = ?, descricao = ?, status = ? WHERE id = ?",
+            "UPDATE tarefas SET titulo = ?, descricao = ?, status = ? "
+            "WHERE id = ?",
             (tarefa.titulo, tarefa.descricao, tarefa.status, tarefa.id),
         )
+
 
 def remover_tarefa(id_tarefa, caminho=DB_PADRAO):
     """Exclusão lógica: marca a tarefa como excluída, sem apagar o registro."""
