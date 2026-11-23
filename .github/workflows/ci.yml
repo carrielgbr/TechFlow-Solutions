@@ -1,0 +1,31 @@
+name: CI
+
+# Roda a cada push ou pull request na branch main
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  qualidade-e-testes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Validar qualidade do código (flake8)
+        run: flake8 src tests
+
+      - name: Rodar testes (pytest)
+        run: pytest -v
