@@ -1,31 +1,41 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Editar tarefa</title>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; }
-    .aviso { background: #eef; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; }
-    input, textarea, select { width: 100%; margin-bottom: 8px; padding: 6px; box-sizing: border-box; }
-  </style>
-</head>
-<body>
-  <h1>Editar tarefa</h1>
+{% extends "base.html" %}
 
-  {% for mensagem in get_flashed_messages() %}
-    <div class="aviso">{{ mensagem }}</div>
-  {% endfor %}
+{% block titulo %}Editar {{ tarefa.codigo }} · TechFlow Tasks{% endblock %}
 
-  <form method="post">
-    <input type="text" name="titulo" value="{{ tarefa.titulo }}" required>
-    <textarea name="descricao">{{ tarefa.descricao }}</textarea>
-    <select name="status">
-      {% for s in status_validos %}
-        <option value="{{ s }}" {% if s == tarefa.status %}selected{% endif %}>{{ s }}</option>
-      {% endfor %}
-    </select>
-    <button type="submit">Salvar</button>
-    <a href="{{ url_for('index') }}">Cancelar</a>
+{% block conteudo %}
+<section class="painel painel-estreito">
+  <a class="voltar" href="{{ url_for('index') }}">← Voltar ao quadro</a>
+  <h1>Editar tarefa <span class="codigo">{{ tarefa.codigo }}</span></h1>
+
+  <form class="form-editar" method="post">
+    <div class="campo">
+      <label for="titulo">Título</label>
+      <input id="titulo" type="text" name="titulo" maxlength="100"
+             value="{{ tarefa.titulo }}" required>
+    </div>
+
+    <div class="campo">
+      <label for="descricao">Descrição</label>
+      <textarea id="descricao" name="descricao" rows="5">{{ tarefa.descricao }}</textarea>
+    </div>
+
+    <fieldset class="campo">
+      <legend>Status</legend>
+      <div class="opcoes-status">
+        {% for s in status_validos %}
+          <label class="opcao-status opcao-{{ loop.index0 }}">
+            <input type="radio" name="status" value="{{ s }}"
+                   {% if s == tarefa.status %}checked{% endif %}>
+            <span>{{ s }}</span>
+          </label>
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    <div class="form-acoes">
+      <a class="botao botao-secundario" href="{{ url_for('index') }}">Cancelar</a>
+      <button class="botao botao-primario" type="submit">Salvar alterações</button>
+    </div>
   </form>
-</body>
-</html>
+</section>
+{% endblock %}

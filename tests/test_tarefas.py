@@ -74,6 +74,47 @@ def test_exclusao_logica_esconde_mas_mantem_no_banco(db):
 
 # ---------- Rotas ----------
 
-def test_pagina_inicial_responde():
-    resposta = app.test_client().get("/")
+pytest.fixture
+
+
+def cliente(db):
+    """Cliente de teste do Flask apontando para o banco temporário."""
+    app.config["DATABASE"] = db
+    app.config["TESTING"] = True
+    yield app.test_client()
+    app.config["DATABASE"] = "tarefas.db"
+
+
+def test_pagina_inicial_responde(cliente):
+    resposta = cliente.get("/")
     assert resposta.status_code == 200
+    assert "Quadro de tarefas" in resposta.get_data(as_text=True)
+
+
+def test_criar_pela_rota(cliente, db):
+    cliente.post("/tarefas", data={"titulo": "Via formulário", "descricao": ""})
+    assert listar_tarefas(db)[0].titulo == "Via formulário"
+
+
+def test_mover_tarefa_de_coluna(cliente, db):
+    id_tarefa = criar_tarefa(Tarefa("Mover"), db)
+    resposta = cliente.post(f"/tarefas/{id_tarefa}/status", data={"status": "Em Progresso"})
+    assert resposta.status_code == 302
+    assert buscar_tarefa(id_tarefa, db).status == "Em Progresso"
+
+
+def test_mover_com_status_invalido_nao_altera(cliente, db):
+    id_tarefa = criar_tarefa(Tarefa("Mover"), db)
+    cliente.post(f"/tarefas/{id_tarefa}/status", data={"status": "Qualquer"})
+    assert buscar_tarefa(id_tarefa, db).status == "A Fazer"
+
+
+def test_remover_pela_rota(cliente, db):
+    id_tarefa = criar_tarefa(Tarefa("Remover"), db)
+    cliente.post(f"/tarefas/{id_tarefa}/remover")
+    assert buscar_tarefa(id_tarefa, db) is None
+
+
+def test_tarefa_inexistente_da_404(cliente):
+    assert cliente.get("/tarefas/999/editar").status_code == 404
+    assert cliente.post("/tarefas/999/remover").status_code == 404

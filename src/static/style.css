@@ -1,0 +1,185 @@
+/* TechFlow Tasks — estilos da interface */
+
+:root {
+  --fundo: #f4f6fb;
+  --superficie: #ffffff;
+  --borda: #e3e7ef;
+  --texto: #1c2333;
+  --sutil: #667085;
+  --primaria: #3b5bdb;
+  --primaria-escura: #2f4ac0;
+  --perigo: #d64545;
+  --sucesso: #2f9e6e;
+  --sombra: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .08);
+  --raio: 10px;
+
+  /* cor de cada coluna do Kanban */
+  --c0: #f59f00; /* A Fazer */
+  --c1: #3b5bdb; /* Em Progresso */
+  --c2: #2f9e6e; /* Concluído */
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+  background: var(--fundo);
+  color: var(--texto);
+  line-height: 1.45;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3 { margin: 0; }
+h1 { font-size: 1.45rem; }
+
+a { color: var(--primaria); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.sutil { color: var(--sutil); font-weight: 400; font-size: .9rem; margin: 2px 0 0; }
+
+/* ---------- Topo ---------- */
+.topo { background: #141b2d; color: #fff; }
+.topo-conteudo {
+  max-width: 1200px; margin: 0 auto; padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.marca { color: #fff; display: flex; align-items: center; gap: 10px; font-size: 1.1rem; }
+.marca:hover { text-decoration: none; }
+.marca-icone {
+  background: var(--primaria); border-radius: 8px; width: 32px; height: 32px;
+  display: grid; place-items: center; font-weight: 700; font-size: .85rem;
+}
+.topo-sub { color: #aab3c5; font-size: .85rem; }
+
+/* ---------- Conteúdo ---------- */
+.conteudo { flex: 1; width: 100%; max-width: 1200px; margin: 0 auto; padding: 24px 20px 40px; }
+
+.painel {
+  background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio);
+  box-shadow: var(--sombra); padding: 20px; margin-bottom: 24px;
+}
+.painel-estreito { max-width: 640px; margin: 0 auto; }
+.painel-cabecalho { margin-bottom: 16px; }
+
+/* ---------- Avisos (flash) ---------- */
+.avisos { display: grid; gap: 8px; margin-bottom: 16px; }
+.aviso { padding: 10px 14px; border-radius: 8px; border-left: 4px solid; font-size: .95rem; }
+.aviso-sucesso { background: #e9f7f0; border-color: var(--sucesso); color: #1d6b49; }
+.aviso-erro { background: #fdecec; border-color: var(--perigo); color: #9b2c2c; }
+.aviso-info { background: #edf1fd; border-color: var(--primaria); color: #2f4ac0; }
+
+/* ---------- Formulários ---------- */
+.campo { display: flex; flex-direction: column; gap: 6px; margin: 0; border: 0; padding: 0; }
+label, legend { font-size: .85rem; font-weight: 600; color: #344054; }
+
+input[type="text"], textarea {
+  width: 100%; font: inherit; color: inherit; padding: 10px 12px;
+  border: 1px solid #cfd5e1; border-radius: 8px; background: #fff;
+  transition: border-color .15s, box-shadow .15s;
+}
+input[type="text"]:focus, textarea:focus {
+  outline: none; border-color: var(--primaria); box-shadow: 0 0 0 3px rgba(59, 91, 219, .18);
+}
+textarea { resize: vertical; }
+
+.form-nova { display: grid; grid-template-columns: 2fr 3fr auto; gap: 12px; align-items: end; }
+
+.form-editar { display: grid; gap: 18px; margin-top: 18px; }
+.form-acoes { display: flex; justify-content: flex-end; gap: 10px; }
+
+.voltar { display: inline-block; font-size: .9rem; margin-bottom: 10px; }
+
+.opcoes-status { display: flex; flex-wrap: wrap; gap: 8px; }
+.opcao-status { cursor: pointer; }
+.opcao-status input { position: absolute; opacity: 0; pointer-events: none; }
+.opcao-status span {
+  display: inline-block; padding: 8px 14px; border-radius: 999px; font-weight: 500;
+  border: 1px solid #cfd5e1; background: #fff; color: #344054; transition: all .15s;
+}
+.opcao-status input:focus-visible + span { box-shadow: 0 0 0 3px rgba(59, 91, 219, .25); }
+.opcao-0 input:checked + span { background: var(--c0); border-color: var(--c0); color: #fff; }
+.opcao-1 input:checked + span { background: var(--c1); border-color: var(--c1); color: #fff; }
+.opcao-2 input:checked + span { background: var(--c2); border-color: var(--c2); color: #fff; }
+
+/* ---------- Botões ---------- */
+.botao {
+  font: inherit; font-weight: 600; border-radius: 8px; padding: 10px 16px; cursor: pointer;
+  border: 1px solid transparent; display: inline-block; text-align: center; white-space: nowrap;
+}
+.botao:hover { text-decoration: none; }
+.botao-primario { background: var(--primaria); color: #fff; }
+.botao-primario:hover { background: var(--primaria-escura); }
+.botao-secundario { background: #fff; color: #344054; border-color: #cfd5e1; }
+.botao-secundario:hover { background: #f2f4f7; }
+
+.botao-mini {
+  font-size: .78rem; padding: 5px 10px; background: #f2f4f7; color: #344054;
+  border-color: var(--borda);
+}
+.botao-mini:hover { background: #e7eaf0; }
+.botao-avancar { background: #edf1fd; color: var(--primaria-escura); border-color: #d3dcfa; }
+.botao-avancar:hover { background: #dfe6fc; }
+.botao-perigo { background: transparent; color: var(--perigo); border-color: transparent; }
+.botao-perigo:hover { background: #fdecec; }
+
+/* ---------- Quadro Kanban ---------- */
+.quadro { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: start; }
+
+.coluna { background: #eaeef5; border-radius: var(--raio); padding: 12px; border-top: 4px solid; }
+.coluna-0 { border-color: var(--c0); --cor: var(--c0); }
+.coluna-1 { border-color: var(--c1); --cor: var(--c1); }
+.coluna-2 { border-color: var(--c2); --cor: var(--c2); }
+
+.coluna-cabecalho { display: flex; align-items: center; gap: 8px; padding: 2px 4px 12px; }
+.coluna-cabecalho h2 { font-size: .95rem; flex: 1; }
+.coluna-ponto { width: 10px; height: 10px; border-radius: 50%; background: var(--cor); }
+.contador {
+  background: #fff; color: var(--sutil); border-radius: 999px; padding: 1px 9px;
+  font-size: .8rem; font-weight: 600;
+}
+
+.coluna-lista { display: grid; gap: 10px; }
+
+.cartao {
+  background: var(--superficie); border: 1px solid var(--borda); border-radius: 8px;
+  padding: 12px; box-shadow: var(--sombra); border-left: 3px solid var(--cor);
+  transition: transform .12s, box-shadow .12s;
+}
+.cartao:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(16, 24, 40, .1); }
+
+.cartao-topo { display: flex; justify-content: space-between; align-items: center; }
+.codigo {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: .75rem;
+  color: var(--sutil); background: #f2f4f7; padding: 2px 6px; border-radius: 5px; font-weight: 600;
+}
+h1 .codigo { font-size: .9rem; vertical-align: middle; }
+.link-editar { font-size: .8rem; font-weight: 600; }
+
+.cartao-titulo { font-size: .98rem; margin: 8px 0 4px; word-break: break-word; }
+.cartao-descricao {
+  margin: 0; color: var(--sutil); font-size: .88rem; white-space: pre-wrap; word-break: break-word;
+}
+/* cards concluídos ficam com o título riscado */
+.coluna-2 .cartao-titulo { text-decoration: line-through; color: var(--sutil); }
+
+.cartao-acoes { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.cartao-acoes form { margin: 0; }
+.acao-remover { margin-left: auto !important; }
+
+.vazio {
+  margin: 0; padding: 18px 10px; text-align: center; color: var(--sutil); font-size: .88rem;
+  border: 2px dashed #d0d6e2; border-radius: 8px;
+}
+
+/* ---------- Rodapé ---------- */
+.rodape { text-align: center; color: var(--sutil); font-size: .8rem; padding: 18px; }
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 900px) {
+  .quadro { grid-template-columns: 1fr; }
+  .form-nova { grid-template-columns: 1fr; }
+  .topo-sub { display: none; }
+}

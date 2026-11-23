@@ -1,0 +1,598 @@
+From a99b069b16d69ec44ef244c6af2411ec22d9784a Mon Sep 17 00:00:00 2001
+From: Gabriel Carriel <gabrielcarriel61@gmail.com>
+Date: Mon, 23 Nov 2026 11:50:42 -0300
+Subject: [PATCH 2/2] docs: adiciona diagramas UML, mapa mental, MER/DER e
+ fluxogramas em /docs (closes #11)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- casos de uso com descrição, regras de negócio e fluxos alternativos
+- diagrama de classes e diagrama de sequência (criar tarefa)
+- mapa mental do sistema
+- MER conceitual, DER, dicionário de dados e DDL do SQLite
+- fluxogramas de navegação, de cada operação, estados da tarefa e CI
+- README com instruções de execução, testes e link para a documentação
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01PA7L7Zx6rsL5okeQGMYYev
+---
+ README.md                   |  24 ++++++-
+ docs/README.md              |  17 +++++
+ docs/casos-de-uso.md        |  58 +++++++++++++++
+ docs/diagrama-de-classes.md | 108 ++++++++++++++++++++++++++++
+ docs/fluxogramas.md         | 136 ++++++++++++++++++++++++++++++++++++
+ docs/mapa-mental.md         |  49 +++++++++++++
+ docs/mer-der.md             | 117 +++++++++++++++++++++++++++++++
+ 7 files changed, 506 insertions(+), 3 deletions(-)
+ create mode 100644 docs/README.md
+ create mode 100644 docs/casos-de-uso.md
+ create mode 100644 docs/diagrama-de-classes.md
+ create mode 100644 docs/fluxogramas.md
+ create mode 100644 docs/mapa-mental.md
+ create mode 100644 docs/mer-der.md
+
+diff --git a/README.md b/README.md
+index 3375417..2c149df 100644
+--- a/README.md
++++ b/README.md
+@@ -9,12 +9,30 @@ Sistema web para a startup de logística acompanhar o fluxo de trabalho,
+ priorizar tarefas críticas e monitorar o desempenho da equipe.
+ 
+ ## Escopo inicial
+-- Criar, listar, editar e remover tarefas (CRUD)
+-- Status da tarefa: A Fazer, Em Progresso, Concluído
++- Criar, listar, editar e remover tarefas (CRUD, com exclusão lógica)
++- Quadro Kanban com as colunas A Fazer, Em Progresso e Concluído
++- Mover tarefas entre colunas com os botões Avançar e Voltar
+ 
+ ## Metodologia
+ Kanban híbrido com Scrum: quadro no GitHub Projects, entregas pequenas
+ e commits frequentes, cada card vinculado a uma issue.
+ 
+ ## Como executar
+-(será preenchido quando o código estiver pronto)
+\ No newline at end of file
++```bash
++python -m venv venv
++source venv/bin/activate        # Windows: venv\Scripts\activate
++pip install -r requirements.txt
++flask --app src.app run --debug
++```
++Acesse http://127.0.0.1:5000.
++
++## Testes e qualidade
++```bash
++pytest -v
++flake8 src tests
++```
++O GitHub Actions roda os mesmos comandos a cada push e pull request na `main`.
++
++## Documentação
++Diagramas UML (casos de uso, classes, sequência), mapa mental, MER/DER e fluxogramas
++estão em [`docs/`](docs/README.md).
+\ No newline at end of file
+diff --git a/docs/README.md b/docs/README.md
+new file mode 100644
+index 0000000..18f8410
+--- /dev/null
++++ b/docs/README.md
+@@ -0,0 +1,17 @@
++# Documentação do TechFlow Tasks
++
++Diagramas do sistema escritos em Markdown com [Mermaid](https://mermaid.js.org/).
++O GitHub renderiza os diagramas automaticamente ao abrir cada arquivo.
++
++| Documento | Conteúdo |
++|---|---|
++| [Mapa mental](mapa-mental.md) | Visão geral do sistema: funcionalidades, arquitetura, dados, qualidade e metodologia |
++| [Casos de uso (UML)](casos-de-uso.md) | Ator, casos de uso e descrição de cada um |
++| [Diagrama de classes (UML)](diagrama-de-classes.md) | Classe `Tarefa`, módulos `database` e `app`, e diagrama de sequência |
++| [MER e DER](mer-der.md) | Modelo conceitual, modelo lógico/físico e dicionário de dados do SQLite |
++| [Fluxogramas](fluxogramas.md) | Fluxo de navegação, fluxo de cada operação, estados da tarefa e pipeline de CI |
++
++## Como visualizar fora do GitHub
++
++- **VS Code:** instale a extensão *Markdown Preview Mermaid Support* e abra o preview (`Ctrl+Shift+V`).
++- **Online:** copie o bloco `mermaid` para o [Mermaid Live Editor](https://mermaid.live) e exporte em PNG/SVG.
+diff --git a/docs/casos-de-uso.md b/docs/casos-de-uso.md
+new file mode 100644
+index 0000000..4f62491
+--- /dev/null
++++ b/docs/casos-de-uso.md
+@@ -0,0 +1,58 @@
++# Diagrama de Casos de Uso (UML)
++
++O sistema tem um ator principal, o **Membro da equipe**, que gerencia as tarefas pelo
++navegador. A validação dos dados é um caso de uso incluído (`<<include>>`) sempre que uma
++tarefa é criada, editada ou movida.
++
++> O Mermaid não tem um tipo próprio para casos de uso; a notação UML é representada com
++> ator, elipses (casos de uso) e a fronteira do sistema.
++
++```mermaid
++flowchart LR
++    ator["🧑‍💼<br/>Membro da equipe"]
++
++    subgraph sistema["Sistema TechFlow Tasks"]
++        direction TB
++        UC01(["UC01 · Criar tarefa"])
++        UC02(["UC02 · Visualizar quadro de tarefas"])
++        UC03(["UC03 · Editar tarefa"])
++        UC04(["UC04 · Mover tarefa de status"])
++        UC05(["UC05 · Remover tarefa"])
++        UC06(["UC06 · Validar dados da tarefa"])
++    end
++
++    ator --- UC01
++    ator --- UC02
++    ator --- UC03
++    ator --- UC04
++    ator --- UC05
++
++    UC01 -. "&lt;&lt;include&gt;&gt;" .-> UC06
++    UC03 -. "&lt;&lt;include&gt;&gt;" .-> UC06
++    UC04 -. "&lt;&lt;include&gt;&gt;" .-> UC06
++```
++
++## Descrição dos casos de uso
++
++| ID | Caso de uso | Ator | Fluxo principal | Rota |
++|---|---|---|---|---|
++| UC01 | Criar tarefa | Membro da equipe | Preenche título (obrigatório) e descrição; o sistema valida e salva com status **A Fazer** | `POST /tarefas` |
++| UC02 | Visualizar quadro | Membro da equipe | Abre a página inicial e vê as tarefas ativas separadas em 3 colunas, com contador | `GET /` |
++| UC03 | Editar tarefa | Membro da equipe | Altera título, descrição e status; o sistema valida e salva | `GET/POST /tarefas/<id>/editar` |
++| UC04 | Mover tarefa | Membro da equipe | Clica em **Avançar** ou **Voltar** no cartão; o status muda para a coluna vizinha | `POST /tarefas/<id>/status` |
++| UC05 | Remover tarefa | Membro da equipe | Clica em **Remover** e confirma; a tarefa some do quadro (exclusão lógica) | `POST /tarefas/<id>/remover` |
++| UC06 | Validar dados | — (incluído) | Título não vazio, até 100 caracteres, status entre os 3 permitidos | `Tarefa.validar()` |
++
++## Regras de negócio
++
++- **RN01:** o título é obrigatório e tem no máximo 100 caracteres.
++- **RN02:** o status deve ser `A Fazer`, `Em Progresso` ou `Concluído`.
++- **RN03:** toda tarefa nova começa em `A Fazer`.
++- **RN04:** a remoção é lógica: o registro fica no banco com a data em `excluida_em` e
++  deixa de aparecer no quadro.
++- **RN05:** cada tarefa é exibida com um código legível no formato `TF-0001`.
++
++## Fluxos alternativos
++
++- **UC01/UC03 – dados inválidos:** o sistema não grava e mostra as mensagens de erro.
++- **UC03/UC04/UC05 – tarefa inexistente ou removida:** o sistema responde **404**.
+diff --git a/docs/diagrama-de-classes.md b/docs/diagrama-de-classes.md
+new file mode 100644
+index 0000000..dbafcdb
+--- /dev/null
++++ b/docs/diagrama-de-classes.md
+@@ -0,0 +1,108 @@
++# Diagrama de Classes (UML)
++
++O sistema segue uma separação em três camadas:
++
++- **Modelo** (`src/models.py`): a classe `Tarefa` e suas regras de validação.
++- **Persistência** (`src/database.py`): funções de acesso ao SQLite.
++- **Controle/Visão** (`src/app.py` + `templates/`): rotas Flask que recebem as requisições
++  e renderizam as páginas.
++
++Como `database.py` e `app.py` são módulos Python (funções, não classes), eles aparecem
++com os estereótipos `<<módulo>>` e `<<controller>>`.
++
++```mermaid
++classDiagram
++    direction TB
++
++    class Tarefa {
++        +int id
++        +str titulo
++        +str descricao
++        +str status
++        +codigo() str
++        +validar() list~str~
++    }
++    note for Tarefa "status ∈ STATUS_VALIDOS<br>codigo = 'TF-' + id com 4 dígitos"
++
++    class STATUS_VALIDOS {
++        <<enumeration>>
++        A Fazer
++        Em Progresso
++        Concluído
++    }
++
++    class database {
++        <<módulo>>
++        +str DB_PADRAO = "tarefas.db"
++        +conectar(caminho) Connection
++        +criar_tabela(caminho) None
++        +criar_tarefa(tarefa, caminho) int
++        +listar_tarefas(caminho) list~Tarefa~
++        +buscar_tarefa(id_tarefa, caminho) Tarefa
++        +atualizar_tarefa(tarefa, caminho) None
++        +remover_tarefa(id_tarefa, caminho) None
++        -_para_tarefa(linha) Tarefa
++    }
++
++    class app {
++        <<controller>>
++        +Flask app
++        +index() GET /
++        +criar() POST /tarefas
++        +editar(id_tarefa) GET|POST /tarefas/id/editar
++        +mover(id_tarefa) POST /tarefas/id/status
++        +remover(id_tarefa) POST /tarefas/id/remover
++        -_db() str
++        -_buscar_ou_404(id_tarefa) Tarefa
++    }
++
++    Tarefa ..> STATUS_VALIDOS : valida contra
++    database ..> Tarefa : cria e persiste
++    app ..> database : usa
++    app ..> Tarefa : instancia
++```
++
++## Responsabilidades
++
++| Elemento | Responsabilidade |
++|---|---|
++| `Tarefa` | Guardar os dados de uma tarefa, gerar o código `TF-0000` e validar título/status |
++| `STATUS_VALIDOS` | Lista fixa das colunas do Kanban |
++| `database` | Abrir conexão, criar tabela e executar o CRUD (com exclusão lógica) |
++| `app` | Receber as requisições HTTP, chamar validação/banco e renderizar os templates |
++
++## Diagrama de sequência: criar tarefa
++
++Mostra como as camadas conversam quando o usuário envia o formulário de nova tarefa.
++
++```mermaid
++sequenceDiagram
++    actor U as Membro da equipe
++    participant N as Navegador
++    participant A as app.py (Flask)
++    participant T as Tarefa
++    participant D as database.py
++    participant B as SQLite
++
++    U->>N: Preenche título e descrição
++    N->>A: POST /tarefas
++    A->>T: Tarefa(titulo, descricao)
++    A->>T: validar()
++    T-->>A: lista de erros
++
++    alt dados válidos
++        A->>D: criar_tarefa(tarefa)
++        D->>B: INSERT INTO tarefas
++        B-->>D: id gerado
++        A->>N: flash "Tarefa criada" + redirect /
++    else dados inválidos
++        A->>N: flash com os erros + redirect /
++    end
++
++    N->>A: GET /
++    A->>D: listar_tarefas()
++    D->>B: SELECT ... WHERE excluida_em IS NULL
++    B-->>D: linhas
++    D-->>A: list[Tarefa]
++    A-->>N: index.html (quadro Kanban)
++```
+diff --git a/docs/fluxogramas.md b/docs/fluxogramas.md
+new file mode 100644
+index 0000000..f4f4955
+--- /dev/null
++++ b/docs/fluxogramas.md
+@@ -0,0 +1,136 @@
++# Fluxogramas do Sistema
++
++## 1. Fluxo geral de navegação
++
++Do acesso ao sistema até cada operação disponível no quadro.
++
++```mermaid
++flowchart TD
++    inicio([Início]) --> acessa[Usuário acessa a página inicial /]
++    acessa --> carrega[Sistema lista as tarefas ativas]
++    carrega --> quadro[/Exibe quadro: A Fazer · Em Progresso · Concluído/]
++    quadro --> acao{Qual ação?}
++
++    acao -->|Criar| criar[[Fluxo: criar tarefa]]
++    acao -->|Avançar / Voltar| mover[[Fluxo: mover tarefa]]
++    acao -->|Editar| editar[[Fluxo: editar tarefa]]
++    acao -->|Remover| remover[[Fluxo: remover tarefa]]
++    acao -->|Sair| fim([Fim])
++
++    criar --> carrega
++    mover --> carrega
++    editar --> carrega
++    remover --> carrega
++```
++
++## 2. Criar tarefa
++
++```mermaid
++flowchart TD
++    a([Início]) --> b[/Usuário informa título e descrição/]
++    b --> c[POST /tarefas]
++    c --> d{Título preenchido?}
++    d -->|Não| e[Erro: O título é obrigatório]
++    d -->|Sim| f{Título até 100 caracteres?}
++    f -->|Não| g[Erro: máximo de 100 caracteres]
++    f -->|Sim| h[(INSERT na tabela tarefas<br/>status = A Fazer)]
++    h --> i[Mensagem: Tarefa criada com sucesso]
++    e --> j[Redireciona para o quadro]
++    g --> j
++    i --> j
++    j --> k([Fim])
++```
++
++## 3. Editar tarefa
++
++```mermaid
++flowchart TD
++    a([Início]) --> b[Usuário clica em Editar]
++    b --> c{Tarefa existe e está ativa?}
++    c -->|Não| d[Erro 404]
++    c -->|Sim| e[/Exibe formulário preenchido/]
++    e --> f[/Usuário altera título, descrição e status/]
++    f --> g[POST /tarefas/id/editar]
++    g --> h{Dados válidos?}
++    h -->|Não| i[Mostra erros e mantém no formulário]
++    i --> f
++    h -->|Sim| j[(UPDATE tarefas)]
++    j --> k[Mensagem de sucesso e volta ao quadro]
++    d --> z([Fim])
++    k --> z
++```
++
++## 4. Mover tarefa (Avançar / Voltar)
++
++```mermaid
++flowchart TD
++    a([Início]) --> b[Usuário clica em Avançar ou Voltar]
++    b --> c[POST /tarefas/id/status<br/>com o status da coluna vizinha]
++    c --> d{Tarefa existe?}
++    d -->|Não| e[Erro 404]
++    d -->|Sim| f{Status é válido?}
++    f -->|Não| g[Mensagem: Status inválido]
++    f -->|Sim| h[(UPDATE status)]
++    h --> i[Mensagem: TF-0000 movida para ...]
++    g --> j[Volta ao quadro]
++    i --> j
++    e --> k([Fim])
++    j --> k
++```
++
++## 5. Remover tarefa (exclusão lógica)
++
++```mermaid
++flowchart TD
++    a([Início]) --> b[Usuário clica em Remover]
++    b --> c{Confirma no diálogo?}
++    c -->|Não| z([Fim])
++    c -->|Sim| d[POST /tarefas/id/remover]
++    d --> e{Tarefa existe?}
++    e -->|Não| f[Erro 404]
++    e -->|Sim| g[(UPDATE excluida_em = agora)]
++    g --> h[Tarefa some do quadro,<br/>registro continua no banco]
++    f --> z
++    h --> z
++```
++
++## 6. Ciclo de vida da tarefa (estados)
++
++```mermaid
++stateDiagram-v2
++    [*] --> AFazer : criar
++    AFazer : A Fazer
++    EmProgresso : Em Progresso
++    Concluido : Concluído
++
++    AFazer --> EmProgresso : avançar
++    EmProgresso --> Concluido : avançar
++    Concluido --> EmProgresso : voltar
++    EmProgresso --> AFazer : voltar
++
++    AFazer --> Removida : remover
++    EmProgresso --> Removida : remover
++    Concluido --> Removida : remover
++    Removida : Removida (exclusão lógica)
++    Removida --> [*]
++```
++
++> Pela tela de edição também é possível trocar o status diretamente para qualquer coluna.
++
++## 7. Fluxo de desenvolvimento e CI
++
++Como uma mudança sai do Kanban e chega à branch `main`.
++
++```mermaid
++flowchart LR
++    a[Issue no Kanban<br/>GitHub Projects] --> b[Desenvolvimento local]
++    b --> c[Commit com<br/>closes #N]
++    c --> d[git push / Pull Request]
++    d --> e[GitHub Actions]
++    e --> f[flake8]
++    f --> g[pytest]
++    g --> h{Passou?}
++    h -->|Não| b
++    h -->|Sim| i[Merge na main]
++    i --> j[Issue fechada<br/>card vai para Done]
++```
+diff --git a/docs/mapa-mental.md b/docs/mapa-mental.md
+new file mode 100644
+index 0000000..48b4058
+--- /dev/null
++++ b/docs/mapa-mental.md
+@@ -0,0 +1,49 @@
++# Mapa mental do sistema
++
++Visão geral do TechFlow Tasks em um único diagrama.
++
++```mermaid
++mindmap
++  root((TechFlow Tasks))
++    Objetivo
++      Acompanhar o fluxo de trabalho
++      Priorizar tarefas críticas
++      Monitorar o desempenho da equipe
++    Funcionalidades
++      Criar tarefa
++      Listar no quadro Kanban
++      Editar título e descrição
++      Mover entre colunas
++        A Fazer
++        Em Progresso
++        Concluído
++      Remover com exclusão lógica
++      Código legível TF-0000
++    Arquitetura
++      Flask
++        app.py rotas
++        templates Jinja2
++        static CSS
++      Modelo
++        models.py classe Tarefa
++        Validação de dados
++      Persistência
++        database.py
++        SQLite tarefas.db
++    Dados
++      Tabela tarefas
++        id
++        titulo
++        descricao
++        status
++        excluida_em
++    Qualidade
++      pytest testes automatizados
++      flake8 padrão de código
++      GitHub Actions CI
++    Metodologia
++      Kanban + Scrum
++      GitHub Projects
++      Issues vinculadas a commits
++      closes #N fecha a issue
++```
+diff --git a/docs/mer-der.md b/docs/mer-der.md
+new file mode 100644
+index 0000000..7cc47b4
+--- /dev/null
++++ b/docs/mer-der.md
+@@ -0,0 +1,117 @@
++# Modelagem do Banco de Dados (MER e DER)
++
++O banco é um arquivo **SQLite** (`tarefas.db`) criado automaticamente por
++`criar_tabela()` em `src/database.py`. A versão atual tem uma única entidade, `TAREFA`.
++
++## 1. MER: Modelo Entidade-Relacionamento (conceitual)
++
++Notação de Peter Chen: retângulo = entidade, elipse = atributo,
++**PK** = identificador.
++
++```mermaid
++flowchart TB
++    T[TAREFA]
++
++    id(("id (PK)"))
++    titulo((titulo))
++    descricao((descricao))
++    status((status))
++    excluida((excluida_em))
++    codigo(("codigo<br/>(derivado)"))
++
++    T --- id
++    T --- titulo
++    T --- descricao
++    T --- status
++    T --- excluida
++    T -.- codigo
++```
++
++- `codigo` é um **atributo derivado**: não é gravado no banco, é calculado a partir do `id`
++  (`TF-0001`).
++- `status` é um atributo com **domínio restrito**: `A Fazer`, `Em Progresso` ou `Concluído`.
++- `excluida_em` registra a **exclusão lógica** (vazio = tarefa ativa).
++
++## 2. DER: Diagrama Entidade-Relacionamento (lógico/físico)
++
++Notação pé de galinha (Crow's Foot), com os tipos do SQLite.
++
++```mermaid
++erDiagram
++    TAREFAS {
++        INTEGER id PK "AUTOINCREMENT"
++        TEXT titulo "NOT NULL, até 100 caracteres"
++        TEXT descricao "DEFAULT ''"
++        TEXT status "NOT NULL, DEFAULT 'A Fazer'"
++        TEXT excluida_em "NULL = ativa; data = removida"
++    }
++```
++
++## 3. Dicionário de dados
++
++| Coluna | Tipo | Nulo? | Padrão | Restrição / regra |
++|---|---|---|---|---|
++| `id` | INTEGER | Não | auto | Chave primária, `AUTOINCREMENT` |
++| `titulo` | TEXT | Não | — | Obrigatório, máx. 100 caracteres (validado em `Tarefa.validar()`) |
++| `descricao` | TEXT | Sim | `''` | Texto livre |
++| `status` | TEXT | Não | `'A Fazer'` | `A Fazer`, `Em Progresso` ou `Concluído` (validado na aplicação) |
++| `excluida_em` | TEXT | Sim | `NULL` | Data/hora da exclusão lógica (`datetime('now')`) |
++
++## 4. Script SQL (DDL)
++
++```sql
++CREATE TABLE IF NOT EXISTS tarefas (
++    id          INTEGER PRIMARY KEY AUTOINCREMENT,
++    titulo      TEXT NOT NULL,
++    descricao   TEXT DEFAULT '',
++    status      TEXT NOT NULL DEFAULT 'A Fazer',
++    excluida_em TEXT DEFAULT NULL
++);
++```
++
++## 5. Consultas usadas pelo sistema
++
++| Operação | SQL |
++|---|---|
++| Criar | `INSERT INTO tarefas (titulo, descricao, status) VALUES (?, ?, ?)` |
++| Listar ativas | `SELECT * FROM tarefas WHERE excluida_em IS NULL ORDER BY id DESC` |
++| Buscar por id | `SELECT * FROM tarefas WHERE id = ? AND excluida_em IS NULL` |
++| Atualizar / mover | `UPDATE tarefas SET titulo = ?, descricao = ?, status = ? WHERE id = ?` |
++| Remover (lógica) | `UPDATE tarefas SET excluida_em = datetime('now') WHERE id = ?` |
++
++## 6. Evolução proposta (fora do escopo atual)
++
++Para atender ao objetivo de *monitorar o desempenho da equipe*, uma próxima versão poderia
++separar usuários e o histórico de mudanças de status. Este modelo **ainda não está
++implementado**; serve como planejamento.
++
++```mermaid
++erDiagram
++    USUARIOS ||--o{ TAREFAS : "é responsável por"
++    TAREFAS ||--o{ HISTORICO_STATUS : "registra"
++    USUARIOS ||--o{ HISTORICO_STATUS : "altera"
++
++    USUARIOS {
++        INTEGER id PK
++        TEXT nome
++        TEXT email UK
++    }
++    TAREFAS {
++        INTEGER id PK
++        TEXT titulo
++        TEXT descricao
++        TEXT status
++        TEXT prioridade
++        INTEGER responsavel_id FK
++        TEXT criada_em
++        TEXT excluida_em
++    }
++    HISTORICO_STATUS {
++        INTEGER id PK
++        INTEGER tarefa_id FK
++        INTEGER usuario_id FK
++        TEXT status_anterior
++        TEXT status_novo
++        TEXT alterado_em
++    }
++```
+-- 
+2.43.0
+

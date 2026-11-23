@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}TechFlow Tasks{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topo">
+    <div class="topo-conteudo">
+      <a class="marca" href="{{ url_for('index') }}">
+        <span class="marca-icone" aria-hidden="true">TF</span>
+        <span>TechFlow <strong>Tasks</strong></span>
+      </a>
+      <span class="topo-sub">Gestão de tarefas · Logística</span>
+    </div>
+  </header>
+
+  <main class="conteudo">
+    {% with mensagens = get_flashed_messages(with_categories=true) %}
+      {% if mensagens %}
+        <div class="avisos">
+          {% for categoria, mensagem in mensagens %}
+            <div class="aviso aviso-{{ categoria if categoria in ['erro', 'sucesso'] else 'info' }}"
+                 role="status">{{ mensagem }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block conteudo %}{% endblock %}
+  </main>
+
+  <footer class="rodape">TechFlow Solutions · Projeto acadêmico · Flask + SQLite</footer>
+</body>
+</html>
